@@ -1,0 +1,8 @@
+.env
+refs/
+out/
+out_clean/
+__pycache__/
+*.pyc
+.venv/
+venv/

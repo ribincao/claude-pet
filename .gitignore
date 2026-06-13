@@ -1,0 +1,38 @@
+# ── Rust / Tauri build artifacts ───────────────────────────
+target/
+**/target/
+# Tauri auto-generates these from capabilities at build time
+pet-app/src-tauri/gen/schemas/
+
+# ── Node ───────────────────────────────────────────────────
+node_modules/
+dist/
+*.tsbuildinfo
+
+# ── Python (sprite-gen) ────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+sprite-gen/out/
+sprite-gen/out_clean/
+sprite-gen/refs/
+
+# ── Secrets / env ──────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Logs / temp ────────────────────────────────────────────
+*.log
+/tmp/
+
+# ── macOS ──────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── Editors / IDEs ─────────────────────────────────────────
+.idea/
+.vscode/
+*.swp

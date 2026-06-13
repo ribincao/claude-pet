@@ -1,0 +1,30 @@
+# 12 sprites for the Claude Pet MVP.
+# Each entry's value is appended after base.md as POSE FOR THIS SPRITE.
+
+walk_01: "DYNAMIC walking stride, facing right — frame 1 of 6 in a smooth cat walk cycle. The cat is in mid-step with MAXIMUM forward reach: front-RIGHT paw is fully extended forward and lifted off the ground; back-LEFT paw is extended backward and pushing off. Front-left and back-right paws are planted, supporting the body. Body is leaning slightly forward, tail held high and curved. This is NOT a standing pose — the legs are clearly in motion."
+
+walk_02: "DYNAMIC walking stride, facing right — frame 2 of 6. The front-RIGHT paw that was forward is now planted, taking the cat's weight. Back-LEFT paw is swinging forward in mid-air, near the body. Front-LEFT paw is starting to lift off the ground. Body shifting weight forward. Tail held high. NOT a standing pose — legs in active mid-swing."
+
+walk_03: "DYNAMIC walking stride, facing right — frame 3 of 6. Passing position: front-LEFT paw is mid-air swinging forward; back-RIGHT paw is lifting and starting to swing forward; the other two paws are planted. Body in transition, slight tilt. Tail held high and curved. NOT idle, NOT standing — clearly mid-walk."
+
+walk_04: "DYNAMIC walking stride, facing right — frame 4 of 6 (mirror counterpart of walk_01). MAXIMUM forward reach on the OPPOSITE diagonal: front-LEFT paw is fully extended forward and lifted; back-RIGHT paw is extended backward and pushing off. Front-right and back-left paws are planted. Body leaning slightly forward. Tail high. NOT a standing pose."
+
+walk_05: "DYNAMIC walking stride, facing right — frame 5 of 6 (mirror counterpart of walk_02). Front-LEFT paw that was forward is now planted, taking weight. Back-RIGHT paw is swinging forward in mid-air. Front-RIGHT paw starting to lift. Tail high. NOT a standing pose — legs in active mid-swing."
+
+walk_06: "DYNAMIC walking stride, facing right — frame 6 of 6 (mirror counterpart of walk_03). Passing position: front-RIGHT paw mid-air swinging forward; back-LEFT paw lifting and starting to swing forward; the other two paws are planted. Body in transition, slight tilt. Tail high. NOT idle."
+
+idle_01: "Standing calmly, facing 3/4 to the right. Eyes OPEN, relaxed neutral expression. Tail hanging down naturally. Quiet, resting posture."
+
+idle_02: "Standing calmly, facing 3/4 to the right. Eyes CLOSED in a blink. Otherwise IDENTICAL to idle_01 — same body position, same tail, same paw placement. Only the eyes differ."
+
+sleep_01: "Curled up in a ball, head tucked toward chest, eyes closed, sleeping peacefully. Side view, body oriented to the right. Body slightly expanded (inhale frame). Cozy, relaxed."
+
+sleep_02: "Curled up in a ball, head tucked toward chest, eyes closed, sleeping peacefully. Side view, body oriented to the right. Body slightly contracted (exhale frame). Otherwise identical to sleep_01."
+
+sit: "Sitting upright on the hind legs, facing 3/4 right, head tilted UP looking toward the viewer. Curious, alert expression. Tail wrapped neatly around the front feet."
+
+alert: "Standing tall, ears perked straight up, eyes wide open, looking forward and slightly upward. Tense, attentive, ready-to-react posture. Tail held still."
+
+happy: "Mid-air joyful jump, facing right. Front paws lifted, hind legs pushing off the ground (or in mid-leap). Mouth slightly open in a content expression. Tail raised high. Bouncy, excited vibe."
+
+sad: "Lying flat on the ground, head resting on the front paws, ears slightly drooped. Eyes half-open and a little sad. Side view, body oriented to the right."

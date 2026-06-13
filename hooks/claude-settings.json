@@ -1,0 +1,62 @@
+{
+  "_comment": "Merge the `hooks` block below into your ~/.claude/settings.json. If you already have a hooks block, merge per-event arrays. Each hook is a shell command that writes a tiny JSON state to ~/.claude/pet-state. The pet app watches that file and reacts.",
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "echo '{\"state\":\"idle\"}' > ~/.claude/pet-state" }
+        ]
+      }
+    ],
+
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "echo '{\"state\":\"walk\"}' > ~/.claude/pet-state" }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "echo '{\"state\":\"walk\"}' > ~/.claude/pet-state" }
+        ]
+      }
+    ],
+
+    "Notification": [
+      {
+        "hooks": [
+          { "type": "command", "command": "echo '{\"state\":\"sit\",\"message\":\"need input\"}' > ~/.claude/pet-state" }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "echo '{\"state\":\"happy\",\"message\":\"done\"}' > ~/.claude/pet-state" }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "echo '{\"state\":\"happy\"}' > ~/.claude/pet-state" }
+        ]
+      }
+    ],
+
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "command": "echo '{\"state\":\"sleep\"}' > ~/.claude/pet-state" }
+        ]
+      }
+    ]
+  }
+}
