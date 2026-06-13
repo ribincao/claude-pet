@@ -83,14 +83,20 @@ echo '{"state":"sleep"}' > ~/.claude/pet-state   # cat lies down
 cat ~/.claude/pet-state                           # see the current state
 ```
 
-### 3. (Optional) Build a standalone app
+### 3. (Optional) Get a standalone app
 
-Dev mode runs a bare binary whose Dock icon is set at runtime. For a permanent, double-clickable app with a stable Dock icon:
+Dev mode runs a bare binary whose Dock icon is set at runtime. For a permanent, double-clickable app with a stable Dock icon, either **download a prebuilt build** from the [Actions tab](../../actions) (each push to `main` uploads a `claude-pet-macos-arm64` artifact containing a `.dmg`), or build it yourself:
 
 ```bash
 cd pet-app && cargo tauri build
 open src-tauri/target/release/bundle/macos/claude-pet.app
 ```
+
+> **The app is not code-signed or notarized.** On first launch macOS Gatekeeper will block it ("can't be opened because it is from an unidentified developer"). This is expected for an open-source build. To open it:
+> - **right-click the app → Open → Open**, or
+> - clear the quarantine flag: `xattr -dr com.apple.quarantine "/Applications/claude-pet.app"`
+>
+> After that it launches normally. (Building locally with `cargo tauri build` ad-hoc signs it, so the prebuilt download is the one that needs this step.)
 
 ## Bring your own pet
 
