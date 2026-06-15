@@ -1,0 +1,42 @@
+name: Release macOS
+
+# Push a version tag (e.g. v0.1.0) -> build the macOS app and publish a GitHub
+# Release with the .dmg attached (public download, no login, never expires).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write   # required to create the Release
+
+jobs:
+  release-macos:
+    runs-on: macos-latest          # Apple Silicon (arm64)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: pet-app/src-tauri
+
+      # Frontend is static HTML/CSS/JS (no npm build step) → straight to the Tauri
+      # build, which produces the .app and .dmg under
+      # pet-app/src-tauri/target/aarch64-apple-darwin/release/bundle/.
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: pet-app
+          args: --target aarch64-apple-darwin
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: pet-app/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          generate_release_notes: true
