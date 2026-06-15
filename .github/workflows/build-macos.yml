@@ -1,12 +1,16 @@
 name: Build macOS
 
-# Build a runnable macOS package on every push to main (and on demand).
-# The .dmg/.app are uploaded as a downloadable artifact — grab it from the
-# run's "Artifacts" section, no signing account needed.
+# - push to main / manual run  -> build + upload a workflow artifact (login, expires in 90d)
+# - push a version tag (v*)     -> build + publish a GitHub Release with the .dmg attached
+#                                  (public download, no login, never expires)
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
+
+permissions:
+  contents: write   # required to create a Release on tag push
 
 jobs:
   build-macos:
@@ -25,8 +29,8 @@ jobs:
         with:
           workspaces: pet-app/src-tauri
 
-      # Frontend is static HTML/CSS/JS (no npm build step), so we go straight
-      # to the Tauri build. This produces the .app and a .dmg under
+      # Frontend is static HTML/CSS/JS (no npm build step), so we go straight to
+      # the Tauri build → .app + .dmg under
       # pet-app/src-tauri/target/aarch64-apple-darwin/release/bundle/.
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
@@ -34,7 +38,8 @@ jobs:
           projectPath: pet-app
           args: --target aarch64-apple-darwin
 
-      - name: Upload macOS package
+      # Always: workflow artifact (handy for main/manual builds).
+      - name: Upload macOS package (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: claude-pet-macos-arm64
@@ -42,3 +47,11 @@ jobs:
           path: |
             pet-app/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
             pet-app/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app
+
+      # Only on a version tag (e.g. v0.1.0): publish a Release with the .dmg attached.
+      - name: Publish Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: pet-app/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          generate_release_notes: true
