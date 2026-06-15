@@ -9,12 +9,19 @@ on:
 permissions:
   contents: write   # required to create the Release
 
+# Run all JavaScript actions on Node 24. GitHub forces this from 2026-06-16
+# anyway; setting it explicitly avoids the Node 20 deprecation warning/breakage
+# for actions that still declare node20 (e.g. action-gh-release, rust-cache).
+# Harmless to keep once Node 24 is the default.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   release-macos:
     runs-on: macos-latest          # Apple Silicon (arm64)
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
