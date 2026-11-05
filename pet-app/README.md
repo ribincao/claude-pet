@@ -1,48 +1,58 @@
 # pet-app
 
-Tauri 2 透明浮窗，渲染 Phase 1 生成的 sprite，按 `~/.claude/pet-state` 文件内容切换动画。
+The Tauri 2 app: a transparent, frameless, always-on-top window that plays the pet's sprite sheets and switches animation whenever `~/.claude/pet-state` changes.
 
-## 运行（开发模式）
+## Run (dev mode)
+
+From this folder:
 
 ```bash
-cd projects/claude-pet/pet-app
-cargo tauri dev
+make start      # cargo tauri dev in the background, logs in /tmp/claude-pet.log
+make stop
 ```
 
-首次编译会装 ~300 个 crate，3-5 分钟。之后增量秒级。
+The first build compiles roughly 300 crates and takes a few minutes; later builds are incremental and fast. See the [main README](../README.md) for the other `make` targets and for building a standalone `Claude Pet.app`.
 
-## 手动驱动状态（不依赖 Claude Code hook）
+## Drive it by hand (no Claude Code needed)
 
 ```bash
 echo '{"state":"walk"}' > ~/.claude/pet-state
 echo '{"state":"sleep"}' > ~/.claude/pet-state
-echo '{"state":"happy","message":"✓ 完成"}' > ~/.claude/pet-state
-echo '{"state":"sad","message":"出错了"}' > ~/.claude/pet-state
+echo '{"state":"happy","message":"done"}' > ~/.claude/pet-state
+echo '{"state":"sad","message":"something broke"}' > ~/.claude/pet-state
 ```
 
-支持的状态：`idle` · `walk` · `sleep` · `sit` · `alert` · `happy` · `sad`
-可选字段：`message`（气泡文字，3.5s 后淡出）
+| State | Clip | Notes |
+|---|---|---|
+| `idle` | looking | Default; also what `happy` and `sad` fall back to |
+| `sit` | looking | Used for "need input" |
+| `alert` | looking | Slightly faster |
+| `happy` | looking | Fastest; back to `idle` after 3s |
+| `walk` | walking | The window moves along the screen and turns at each edge |
+| `sleep` | lying | Slow |
+| `sad` | lying | Back to `idle` after 4s |
 
-## 结构
+Optional field: `message`, shown in a speech bubble that fades after 3.5s. If the file doesn't exist on launch, the app creates it with `{"state":"idle"}`.
+
+## Layout
 
 ```
 pet-app/
-├── src/                vanilla HTML/JS frontend
+├── Makefile             start / stop / restart / status / logs
+├── src/                 static HTML/CSS/JS frontend (no npm build step)
 │   ├── index.html
-│   ├── pet.js          状态机 + sprite 切换
+│   ├── pet.js           sprite engine, state machine, edge-walking, drag
 │   ├── styles.css
-│   └── sprites/        Phase 1 复制过来的 12 张 PNG
-└── src-tauri/          Rust 后端
-    ├── Cargo.toml
-    ├── tauri.conf.json 透明 / frameless / alwaysOnTop
+│   └── sprites/cpp/     looking / walking / lying WebP sheets + pet.json
+└── src-tauri/           Rust backend
+    ├── tauri.conf.json  window: 160×160, transparent, frameless, always on top
     └── src/
-        ├── main.rs     entrypoint
-        └── lib.rs      文件监听 + emit("pet-state")
+        ├── main.rs      entry point
+        └── lib.rs       places the window above the Dock, watches the state file, emits "pet-state"
 ```
 
-## 已知 TODO（Phase 4）
+## Known limitations
 
-- 走路动画：让猫在屏幕边沿来回走（现在只是定点)
-- 点击穿透：开关 `set_ignore_cursor_events(true)`
-- 多显示器：现在固定主屏 (1200, 700)
-- 拖动调整位置
+- **Primary screen only.** The pet starts on the primary monitor's work area and walks within its width.
+- **No click-through.** The 160×160 window always catches clicks, even on its transparent parts.
+- **Apple Silicon only** for the prebuilt release; build locally for anything else.

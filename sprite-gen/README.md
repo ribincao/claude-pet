@@ -1,41 +1,39 @@
 # sprite-gen
 
-生成 12 张布偶猫 sprite 给 claude-pet 用。调用 Gemini 2.5 Image（俗称 Nano Banana），基于参考照片做角色一致的多 pose 生成。
+Optional Python scripts for generating still sprite frames of **your own cat** from reference photos, using image models (Gemini 2.5 Flash Image, or OpenAI's image edit models).
 
-## 一次性准备
+> **Note:** this was the original, frame-by-frame pipeline. The pet bundled in `pet-app/src/sprites/cpp/` uses three WebP sprite sheets (~60 frames each at 12 fps) and wasn't produced by these scripts. Output here is individual PNGs in `out/`. To use them in the app, pack each animation into a grid sheet and register it in `CLIPS` in [`pet.js`](../pet-app/src/pet.js) (see "Bring your own pet" in the [main README](../README.md)).
+
+## Setup (once)
 
 ```bash
-cd projects/claude-pet/sprite-gen
+cd sprite-gen
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# 然后编辑 .env，把 GEMINI_API_KEY 填进去
+# then fill in GEMINI_API_KEY and/or OPENAI_API_KEY in .env
 ```
 
-把 10+ 张你布偶的照片丢到 `refs/`（jpg / png / webp / heic 都行）。不同角度、姿势、光线越多越好。
+Put 10 or more photos of your cat in `refs/` (jpg / png / webp / heic). The more angles, poses and lighting, the better. `refs/`, `out/` and `.env` are gitignored.
 
-## 生成
+## Scripts
 
-```bash
-python generate.py             # 生成全部 12 张
-python generate.py walk_01     # 只生成一张
-python generate.py walk_01 walk_02 walk_03 walk_04   # 一组
-python generate.py --list      # 看支持的状态名
-```
+| Script | Model | What it does |
+|---|---|---|
+| `generate.py` | Gemini | Generates base poses from `refs/`. `python generate.py` for all, `python generate.py walk_01` for one, `--list` for the names |
+| `walk_sheet.py` | Gemini | Generates a 2×2 walk cycle in **one** image so the frames stay consistent, then slices it into `out/walk_s1..s4.png` |
+| `edit_frame.py` | Gemini | Makes a near-identical copy of one frame with a small change: `python edit_frame.py idle_01 idle_02 "eyes closed (blink)"` |
+| `edit_frame_openai.py` | OpenAI | Same as `edit_frame.py`, for when Gemini isn't available in your region |
+| `regen_smooth.py` | OpenAI | Batch version: edits base frames into blink, breathing and in-between walk frames (the job list is at the top of the file) |
+| `clean_alpha.py` | rembg (local) | Removes the soft white halo around generated cut-outs, `out/` → `out_clean/` |
 
-输出在 `out/`。
+Pose descriptions live in [prompts/states.yaml](prompts/states.yaml); the shared style prompt is [prompts/base.md](prompts/base.md). Model overrides: `GEMINI_MODEL` (default `gemini-2.5-flash-image`) and `OPENAI_IMAGE_MODEL` (default `gpt-image-2`).
 
-## 12 张清单
+## Iterating
 
-`walk_01..04` · `idle_01..02` · `sleep_01..02` · `sit` · `alert` · `happy` · `sad`
+If a frame doesn't look like your cat or the pose is wrong:
+1. Edit that pose's description in `states.yaml`.
+2. Re-run `python generate.py <name>` to overwrite it.
 
-详细 pose 描述在 [prompts/states.yaml](prompts/states.yaml)，风格通用 prompt 在 [prompts/base.md](prompts/base.md)。
-
-## 迭代
-
-如果某张不像你的猫 / 姿势不对：
-1. 改对应状态在 `states.yaml` 里的 pose 描述
-2. 重跑 `python generate.py <state_name>` 覆盖
-
-成本预估：每张 ~$0.04，12 张约 $0.5，加迭代 30 张总共约 $1-2。
+For small changes that must keep the body still (blinks, breathing), edit an existing frame with `edit_frame.py` instead of generating from scratch.

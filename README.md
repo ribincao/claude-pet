@@ -1,13 +1,17 @@
 # claude-pet
 
-A desktop pet for **Claude Code on macOS**. A cat lives on your desktop and reacts, in real time, to what Claude Code is doing — it walks around while Claude works, sits and looks at you when it needs your input, does a happy hop when a task finishes, and curls up to sleep when the session ends.
+A desktop pet for **Claude Code on macOS**. A cat lives on your desktop and reacts, in real time, to what Claude Code is doing — it paces along the Dock while Claude works, sits and looks at you when it needs your input, perks up with a "done" bubble when a task finishes, and curls up to sleep when the session ends.
+
+<p align="center">
+  <img src="docs/walking.gif" alt="The cat walking back and forth above the Dock while Claude Code works" width="100%">
+</p>
 
 > Built with [Tauri](https://tauri.app) (Rust + web frontend). The pet is a transparent, always-on-top, frameless window that sits on top of the Dock.
 
 ## What it does
 
 - **Reacts to Claude Code activity.** Claude Code [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) fire on session events and write a tiny state file; the pet animates accordingly.
-- **Lives on your desktop.** Frameless, transparent, always-on-top window. Drag it anywhere; it walks back and forth along the bottom of the screen on its own.
+- **Lives on your desktop.** Frameless, transparent, always-on-top window that starts at the bottom-center of the screen, just above the Dock. Drag it anywhere. While Claude is working it walks back and forth along the screen, turning around at each edge.
 - **Speaks.** Shows a small speech bubble for events like "need input" and "done".
 - **Smooth, lifelike animation.** Sprite-sheet animations (idle/look, walk, rest) play at the bottom of the screen, just above the Dock.
 
@@ -29,6 +33,13 @@ Claude Code event ──(hook writes JSON)──▶ ~/.claude/pet-state
 | A task just finished | `Stop` / `SubagentStop` | `happy` + 💬 "done" | **look** (faster, livelier) → idle |
 | You submit a prompt / a tool is running | `UserPromptSubmit` / `PreToolUse` | `walk` | **walk** (paces along the Dock) |
 | Session ends (you quit / close it) | `SessionEnd` | `sleep` | **lie** (curls up) |
+
+<p align="center">
+  <img src="docs/idle.gif" alt="The cat sitting and looking around while idle" width="240"><br>
+  <sub>Idle: sits and looks around while it waits for you.</sub>
+</p>
+
+Two more states aren't wired to any hook but work if you write them yourself: `alert` (look, slightly faster) and `sad` (lie, then back to idle after 4s). Any state can carry an optional `"message"`, shown in the bubble for 3.5s.
 
 > Note: `Stop` fires at the end of **each turn** (→ back to idle/look), while `SessionEnd` only fires when the session is actually **closed** (→ lie down). So the pet only sleeps when you truly exit Claude Code.
 
@@ -80,21 +91,22 @@ Now use Claude Code as usual and watch the cat react. To test the wiring without
 ```bash
 echo '{"state":"walk"}'  > ~/.claude/pet-state   # cat starts pacing
 echo '{"state":"sleep"}' > ~/.claude/pet-state   # cat lies down
+echo '{"state":"happy","message":"done"}' > ~/.claude/pet-state   # bubble, then back to idle
 cat ~/.claude/pet-state                           # see the current state
 ```
 
 ### 3. (Optional) Get a standalone app
 
-Dev mode runs a bare binary whose Dock icon is set at runtime. For a permanent, double-clickable app with a stable Dock icon, either **download a prebuilt build** from the [Actions tab](../../actions) (each push to `main` uploads a `claude-pet-macos-arm64` artifact containing a `.dmg`), or build it yourself:
+Dev mode runs a bare binary whose Dock icon is set at runtime. For a permanent, double-clickable app with a stable Dock icon, either **download the `.dmg`** from the [Releases page](../../releases) (Apple Silicon only; each `v*` tag builds and publishes one), or build it yourself:
 
 ```bash
 cd pet-app && cargo tauri build
-open src-tauri/target/release/bundle/macos/claude-pet.app
+open "src-tauri/target/release/bundle/macos/Claude Pet.app"
 ```
 
 > **The app is not code-signed or notarized.** On first launch macOS Gatekeeper will block it ("can't be opened because it is from an unidentified developer"). This is expected for an open-source build. To open it:
 > - **right-click the app → Open → Open**, or
-> - clear the quarantine flag: `xattr -dr com.apple.quarantine "/Applications/claude-pet.app"`
+> - clear the quarantine flag: `xattr -dr com.apple.quarantine "/Applications/Claude Pet.app"`
 >
 > After that it launches normally. (Building locally with `cargo tauri build` ad-hoc signs it, so the prebuilt download is the one that needs this step.)
 
@@ -106,7 +118,7 @@ Each pet is a folder of **sprite sheets + a manifest**, loaded by the animation 
 2. Edit the `CLIPS` table (sheet file, grid columns, cell size, frame count) and the `STATE_MAP` (which clip + speed each state uses) at the top of `pet.js`.
 3. `make restart`.
 
-You can also use the `sprite-gen/` pipeline to generate frames from a photo. The pet's on-screen size is a single constant (`BOX`) in `pet.js`.
+The optional [`sprite-gen/`](sprite-gen/) scripts generate still frames of your own cat from reference photos; you then pack the frames into a sheet yourself. The pet's on-screen size is a single constant (`BOX`) in `pet.js`.
 
 ## License
 

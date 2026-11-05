@@ -3,3 +3,5 @@ Pillow>=10.0
 pillow-heif>=0.18
 PyYAML>=6.0
 python-dotenv>=1.0
+openai>=1.0
+rembg>=2.0

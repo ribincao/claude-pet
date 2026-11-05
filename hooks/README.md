@@ -1,48 +1,48 @@
-# hooks/
+# hooks
 
-Claude Code hook 配置：让一个真实的 Claude 会话驱动桌面宠物。
+Claude Code hook config that lets a real Claude Code session drive the pet. Every hook is a one-line shell command that writes a small JSON state to `~/.claude/pet-state`.
 
-## 状态映射
+## State mapping
 
-| Claude 事件 | 宠物状态 | 含义 |
+| Claude Code event | Pet state | Meaning |
 |---|---|---|
-| `SessionStart` | idle | 会话开始，进入站姿待机 |
-| `UserPromptSubmit` | walk | 你刚发了 prompt，猫开始干活（走来走去） |
-| `PreToolUse` (`*`) | walk | 工具运行中 |
-| `Notification` | sit + 气泡 "need input" | 需要你回应（权限请求等） |
-| `Stop` | happy + 气泡 "done" → idle | 任务完成，开心 3s 后回 idle |
-| `SubagentStop` | happy → idle | 子代理完成 |
-| `SessionEnd` | sleep | 会话关闭，猫睡了 |
+| `SessionStart` | `idle` | Session started; the cat sits and watches you |
+| `UserPromptSubmit` | `walk` | You sent a prompt; the cat starts pacing |
+| `PreToolUse` (`*`) | `walk` | A tool is running |
+| `Notification` | `sit` + bubble "need input" | Claude is waiting on you (a permission prompt, etc.) |
+| `Stop` | `happy` + bubble "done" → `idle` | The turn finished; livelier for 3s, then back to idle |
+| `SubagentStop` | `happy` → `idle` | A subagent finished |
+| `SessionEnd` | `sleep` | Session closed; the cat curls up |
 
-未映射但可后续加：`PreCompact`、`PostCompact`、error 退出码等。
+Not mapped yet, but easy to add: `PreCompact`, `PostCompact`, or `sad` on a failing tool.
 
-## 安装
+## Install
 
-把 [claude-settings.json](claude-settings.json) 里的 `hooks` 块**合并**到 `~/.claude/settings.json`。如果你已经有 hooks，按事件名合并到对应数组里，别整个覆盖。
+Merge the `hooks` block from [claude-settings.json](claude-settings.json) into `~/.claude/settings.json`. If you already have hooks, merge per event name into the existing arrays rather than replacing the whole block.
 
-合并完之后**重启 Claude Code**（hooks 在启动时加载）。
+Then **restart Claude Code**; hooks are loaded at startup.
 
-## 验证
+## Check it works
 
-1. 桌面宠物已启动（`projects/claude-pet/pet-app/src-tauri/target/debug/claude-pet`）
-2. 新开一个 Claude Code 会话
-3. 发个简单 prompt（"ls 当前目录"），观察：
-   - prompt 提交瞬间 → 猫开始 walk
-   - 工具调用期间 → walk 继续
-   - 回答完成 → 跳一下（happy）+ 气泡 "done"，3s 后回 idle
-4. 关闭会话 → sleep
+1. Start the pet (`make start` in [`pet-app/`](../pet-app/), or open `Claude Pet.app`).
+2. Open a new Claude Code session.
+3. Send a simple prompt such as "list the files here" and watch:
+   - when you submit → the cat starts walking
+   - while tools run → it keeps walking
+   - when the answer is done → "done" bubble, livelier for 3s, then idle
+4. Close the session → the cat lies down to sleep.
 
-## 调试
+## Debugging
 
-宠物没反应？先确认是 hook 没跑还是宠物没收到——
+If the pet doesn't react, first find out whether the hook didn't run or the pet didn't pick it up:
 
 ```bash
-# 看 hook 写出了啥
+# what did the hook write?
 cat ~/.claude/pet-state
 
-# 手动测宠物渲染
+# test the pet on its own
 echo '{"state":"walk"}' > ~/.claude/pet-state
-echo '{"state":"happy","message":"测试"}' > ~/.claude/pet-state
+echo '{"state":"happy","message":"test"}' > ~/.claude/pet-state
 ```
 
-如果 `cat` 显示的内容跟最近触发的事件对得上但宠物没反应——是 Tauri 这边的事；如果 `cat` 内容根本不对——是 hook 配置或 Claude Code 没加载到。
+If `cat` shows the state you expect but the pet doesn't move, the problem is on the app side (check `make logs`). If the file's content is wrong or stale, the hooks aren't configured or Claude Code didn't reload them.
